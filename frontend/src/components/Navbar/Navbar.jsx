@@ -82,7 +82,7 @@ const Navbar = ({ setShowLogin }) => {
     if (adminKey === "SRFOODCOURT26") {
       // Store admin token securely (consider using httpOnly cookies in production)
       localStorage.setItem("adminToken", "admin-auth");
-      window.open("https://campusbitesfoodcourtadmin.vercel.app", "_blank");
+      window.open("https://campusbitenescafeadmin.vercel.app/", "_blank");
       setShowAdminAuth(false);
       setAdminKey("");
     } else {
