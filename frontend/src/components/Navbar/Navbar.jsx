@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import "./Navbar.css";
+import "./components/Navbar/Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
@@ -46,19 +46,23 @@ const Navbar = ({ setShowLogin }) => {
     };
   }, []);
 
-  // ✅ FIXED LOGOUT (redirect + trigger login popup)
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  // ✅ FINAL WORKING LOGOUT
+const logout = () => {
+  // Clear storage
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
 
-    setToken("");
-    setUser(null);
+  // Reset context
+  setToken("");
+  setUser(null);
 
-    setShowProfileMenu(false);
+  // Close dropdown
+  setShowProfileMenu(false);
 
-    // 🔥 Redirect with login trigger
-    navigate("/?login=true");
-  };
+  // ✅ Redirect to login page (NO reload)
+  navigate("/login", { replace: true });
+  window.location.reload();
+};
 
   return (
     <>
