@@ -4,17 +4,14 @@ import { StoreContext } from "../../Context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const LoginPopup = ({ showLogin, setShowLogin }) => {
+const LoginPopup = ({ onLoginSuccess }) => {
   const { setToken, setUser, url } = useContext(StoreContext);
   const googleDivRef = useRef(null);
 
-  // ================= GOOGLE RESPONSE =================
   const handleGoogleResponse = async (response) => {
-    const googleToken = response.credential;
-
     try {
       const res = await axios.post(`${url}/api/user/google-login`, {
-        token: googleToken,
+        token: response.credential,
       });
 
       if (res.data.success) {
@@ -27,34 +24,10 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
         setToken(newToken);
         setUser(userData);
 
-        const guestCart =
-          JSON.parse(localStorage.getItem("guestCart")) || {};
-
-        if (Object.keys(guestCart).length > 0) {
-          await axios.post(
-            `${url}/api/cart/merge`,
-            { guestCart },
-            {
-              headers: {
-                Authorization: `Bearer ${newToken}`,
-              },
-            }
-          );
-
-          localStorage.removeItem("guestCart");
-        }
-
         toast.success("Login Successful 🎉");
-        setShowLogin(false);
 
-        const canteenLink = localStorage.getItem("canteenLink");
+        onLoginSuccess(); // 🔥 unlock app
 
-        if (canteenLink) {
-          localStorage.removeItem("canteenLink");
-          window.location.href = canteenLink;
-        } else {
-          window.location.reload();
-        }
       } else {
         toast.error(res.data.message);
       }
@@ -64,42 +37,45 @@ const LoginPopup = ({ showLogin, setShowLogin }) => {
     }
   };
 
-  // ================= GOOGLE INIT =================
   useEffect(() => {
-    if (!showLogin) return; // ✅ SAFE CONDITION HERE
+    const initGoogle = () => {
+      if (!window.google || !googleDivRef.current) return;
 
-    if (!window.google || !googleDivRef.current) return;
+      googleDivRef.current.innerHTML = "";
 
-    googleDivRef.current.innerHTML = "";
+      window.google.accounts.id.initialize({
+        client_id: "850316169928-5a6nn5cq63ikm5vrdr9q5gm9mqplhohg.apps.googleusercontent.com",
+        callback: handleGoogleResponse,
+      });
 
-    window.google.accounts.id.initialize({
-      client_id:
-        "850316169928-5a6nn5cq63ikm5vrdr9q5gm9mqplhohg.apps.googleusercontent.com",
-      callback: handleGoogleResponse,
-    });
+      window.google.accounts.id.renderButton(googleDivRef.current, {
+        theme: "outline",
+        size: "large",
+        width: 300,
+      });
+    };
 
-    window.google.accounts.id.renderButton(googleDivRef.current, {
-      theme: "outline",
-      size: "large",
-      width: 300,
-    });
-  }, [showLogin]); // ✅ IMPORTANT DEPENDENCY
-
-  // ✅ RETURN AFTER HOOKS
-  if (!showLogin) return null;
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.onload = initGoogle;
+      document.body.appendChild(script);
+    } else {
+      initGoogle();
+    }
+  }, []);
 
   return (
     <div className="login-popup">
       <div className="login-popup-container">
 
-        <div className="login-popup-title">
-          <h2>Sign in</h2>
-        </div>
+        <h2 style={{ textAlign: "center" }}>Sign in with Google</h2>
 
         <div
           ref={googleDivRef}
           style={{
-            marginTop: "15px",
+            marginTop: "20px",
             display: "flex",
             justifyContent: "center",
           }}
