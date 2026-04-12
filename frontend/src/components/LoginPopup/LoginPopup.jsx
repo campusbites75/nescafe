@@ -26,8 +26,7 @@ const LoginPopup = ({ onLoginSuccess }) => {
 
         toast.success("Login Successful 🎉");
 
-        onLoginSuccess(); // 🔥 unlock app
-
+        onLoginSuccess(); // unlock app
       } else {
         toast.error(res.data.message);
       }
@@ -38,38 +37,51 @@ const LoginPopup = ({ onLoginSuccess }) => {
   };
 
   useEffect(() => {
-    const initGoogle = () => {
-      if (!window.google || !googleDivRef.current) return;
-
-      googleDivRef.current.innerHTML = "";
-
-      window.google.accounts.id.initialize({
-        client_id: "850316169928-afv9arfjktro2uvqi8j01p79j93g3s86.apps.googleusercontent.com",
-        callback: handleGoogleResponse,
-      });
-
-      window.google.accounts.id.renderButton(googleDivRef.current, {
-        theme: "outline",
-        size: "large",
-        width: 300,
-      });
+    const loadGoogle = () => {
+      if (!window.google) {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onload = renderButton;
+        document.body.appendChild(script);
+      } else {
+        renderButton();
+      }
     };
 
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.onload = initGoogle;
-      document.body.appendChild(script);
-    } else {
-      initGoogle();
-    }
+    const renderButton = () => {
+      // retry until div exists
+      if (!googleDivRef.current) {
+        setTimeout(renderButton, 300);
+        return;
+      }
+
+      try {
+        googleDivRef.current.innerHTML = "";
+
+        window.google.accounts.id.initialize({
+          client_id:
+            "850316169928-afv9arfjktro2uvqi8j01p79j93g3s86.apps.googleusercontent.com",
+          callback: handleGoogleResponse,
+        });
+
+        window.google.accounts.id.renderButton(googleDivRef.current, {
+          theme: "outline",
+          size: "large",
+          width: 300,
+        });
+      } catch (err) {
+        console.log("Google render error:", err);
+      }
+    };
+
+    loadGoogle();
   }, []);
 
   return (
     <div className="login-popup">
       <div className="login-popup-container">
-
         <h2 style={{ textAlign: "center" }}>Sign in with Google</h2>
 
         <div
@@ -80,7 +92,6 @@ const LoginPopup = ({ onLoginSuccess }) => {
             justifyContent: "center",
           }}
         ></div>
-
       </div>
     </div>
   );
