@@ -44,7 +44,7 @@ const LoginPopup = ({ onLoginSuccess }) => {
       googleDivRef.current.innerHTML = "";
 
       window.google.accounts.id.initialize({
-        client_id: "850316169928-5a6nn5cq63ikm5vrdr9q5gm9mqplhohg.apps.googleusercontent.com",
+        client_id: "850316169928-afv9arfjktro2uvqi8j01p79j93g3s86.apps.googleusercontent.com",
         callback: handleGoogleResponse,
       });
 
