@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Home from './pages/Home/Home';
 import Footer from './components/Footer/Footer';
 import Navbar from './components/Navbar/Navbar';
@@ -15,25 +15,39 @@ import About from "./pages/About";
 import Delivery from "./pages/Delivery";
 import Privacy from "./pages/Privacy";
 
-
 const App = () => {
 
-  const [showLogin, setShowLogin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  // 🔒 BLOCK APP UNTIL LOGIN
+  if (!isAuthenticated) {
+    return (
+      <>
+        <ToastContainer />
+        <LoginPopup onLoginSuccess={handleLoginSuccess} />
+      </>
+    );
+  }
+
+  // ✅ AFTER LOGIN
   return (
     <>
       <ToastContainer />
-      {showLogin && <LoginPopup setShowLogin={setShowLogin} />}
 
       <div className="app">
-        <Navbar setShowLogin={setShowLogin} />
+        <Navbar />
 
         <Routes>
-
-          {/* Admin Dashboard */}
           <Route path="/dashboard" element={<AdminDashboard />} />
-
-          {/* Main Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/order" element={<PlaceOrder />} />
@@ -42,10 +56,7 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/delivery" element={<Delivery />} />
           <Route path="/privacy" element={<Privacy />} />
-
-          {/* Redirect any unknown route to Home */}
           <Route path="*" element={<Navigate to="/" replace />} />
-
         </Routes>
       </div>
 
