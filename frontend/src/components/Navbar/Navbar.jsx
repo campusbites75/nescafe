@@ -5,9 +5,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
 
 const Navbar = ({ setShowLogin }) => {
-  const [menu, setMenu] = useState("home");
   const [scrolled, setScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAdminAuth, setShowAdminAuth] = useState(false);
+  const [adminKey, setAdminKey] = useState("");
 
   const profileRef = useRef(null);
 
@@ -19,8 +20,8 @@ const Navbar = ({ setShowLogin }) => {
 
   const hideGreenBox = location.pathname === "/select";
 
-  const [showAdminAuth, setShowAdminAuth] = useState(false);
-  const [adminKey, setAdminKey] = useState("");
+  // ✅ Sync active menu with route
+  const currentPath = location.pathname;
 
   // 🔹 Scroll effect
   useEffect(() => {
@@ -32,7 +33,7 @@ const Navbar = ({ setShowLogin }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔹 Close profile dropdown when clicking outside
+  // 🔹 Close dropdown outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -41,28 +42,27 @@ const Navbar = ({ setShowLogin }) => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
+    return () =>
       document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
-  // ✅ FINAL WORKING LOGOUT
-const logout = () => {
-  // Clear storage
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+  // ✅ FIXED logout
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-  // Reset context
-  setToken("");
-  setUser(null);
+    setToken("");
+    setUser(null);
+    setShowProfileMenu(false);
 
-  // Close dropdown
-  setShowProfileMenu(false);
+    navigate("/login", { replace: true });
+  };
 
-  // ✅ Redirect to login page (NO reload)
-  navigate("/login", { replace: true });
-  window.location.reload();
-};
+  // ✅ Smooth scroll for anchors
+  const handleScrollTo = (id) => {
+    const el = document.querySelector(id);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <>
@@ -78,38 +78,34 @@ const logout = () => {
             <li>
               <Link
                 to="/"
-                onClick={() => setMenu("home")}
-                className={menu === "home" ? "active" : ""}
+                className={currentPath === "/" ? "active" : ""}
               >
                 HOME
               </Link>
             </li>
 
             <li>
-              <a
-                href="#explore-menu"
-                onClick={() => setMenu("menu")}
-                className={menu === "menu" ? "active" : ""}
+              <button
+                onClick={() => handleScrollTo("#explore-menu")}
+                className="menu-link"
               >
                 MENU
-              </a>
+              </button>
             </li>
 
             <li>
-              <a
-                href="#footer"
-                onClick={() => setMenu("contact")}
-                className={menu === "contact" ? "active" : ""}
+              <button
+                onClick={() => handleScrollTo("#footer")}
+                className="menu-link"
               >
                 CONTACT US
-              </a>
+              </button>
             </li>
 
             <li>
               <Link
                 to="/myorders"
-                onClick={() => setMenu("previous")}
-                className={menu === "previous" ? "active" : ""}
+                className={currentPath === "/myorders" ? "active" : ""}
               >
                 PREVIOUS ORDERS
               </Link>
@@ -135,7 +131,6 @@ const logout = () => {
             </button>
           )}
 
-          {/* 🔐 Sign In / Profile */}
           {!token ? (
             <button
               className="signin-btn"
@@ -171,9 +166,7 @@ const logout = () => {
               {showProfileMenu && (
                 <ul className="navbar-profile-dropdown">
                   <li style={{ cursor: "default" }}>
-                    <p>
-                      <strong>{user?.name || "User"}</strong>
-                    </p>
+                    <strong>{user?.name || "User"}</strong>
                   </li>
 
                   <hr />
@@ -201,7 +194,7 @@ const logout = () => {
         </div>
       </div>
 
-      {/* 🔐 Admin Popup */}
+      {/* Admin Popup */}
       {showAdminAuth && (
         <div className="admin-overlay">
           <div className="admin-modal">
@@ -218,7 +211,7 @@ const logout = () => {
               className="admin-enter-btn"
               onClick={() => {
                 if (adminKey === "SRFOODCOURT26") {
-                  window.location.href = "http://localhost:5174/";
+                  window.open("http://localhost:5174/", "_self");
                 } else {
                   alert("Invalid Admin Code");
                 }
