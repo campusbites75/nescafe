@@ -57,8 +57,8 @@ app.use(
         "http://localhost:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5500",
-        "https://campusbitesfoodcourt.vercel.app",
-        "https://campusbitesfoodcourt.vercel.app"
+        "https://campusbitesnescafe.vercel.app",
+        "https://campusbitenescafeadmin.vercel.app"
       ];
 
       if (
