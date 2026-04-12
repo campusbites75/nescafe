@@ -10,7 +10,7 @@ const Header = () => {
     }
   };
 
-  const heroImg = "/food_court.jpg"; // ✅ from public folder
+  const heroImg = "/nescafe_header.jpg"; // ✅ from public folder
 
   return (
     <div
