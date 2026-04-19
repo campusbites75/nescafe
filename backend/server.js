@@ -63,7 +63,7 @@ const io = new Server(server, {
       "http://localhost:5174",
       "http://127.0.0.1:5500",
       "https://campusbitesnescafeadmin-beta.vercel.app",
-      "https://campusbitesnescafe-ochre.vercel.app",
+      "https://campusbitesnescafe-ochre.vercel.app"
     ],
     credentials: true,
   },
@@ -91,8 +91,8 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://127.0.0.1:5500",
-      "https://campusbitesnescafe.vercel.app",
-      "https://campusbitenescafeadmin.vercel.app",
+      "https://campusbitesnescafeadmin-beta.vercel.app",
+      "https://campusbitesnescafe-ochre.vercel.app"
     ],
     credentials: true,
   })
