@@ -26,7 +26,7 @@ const updateStock = async (items) => {
   }
 };
 const currency = "inr";
-const frontend_URL = "https://campusbitesnescafe.vercel.app";
+const frontend_URL = "https://campusbitesnescafe-ochre.vercel.app";
 
 /* ================= VALIDATE ITEMS ================= */
 const validateItems = (items) => {
