@@ -17,7 +17,7 @@ const FoodItem = ({ image, name, price, desc, id }) => {
         if (image.startsWith("http")) return image;
 
         // if only filename
-        return `https://food-court-20n0.onrender.com/images/${image}`;
+        return `https://nescafe-ovhf.onrender.com/images/${image}`;
     };
 
     return (
