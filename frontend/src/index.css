@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* Body styling (premium feel) */
+body {
+  min-height: 100vh;
+  background: #fafafa; /* soft background instead of plain white */
+  color: #1f1f1f;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Main container */
+.app {
+  width: 80%;
+  margin: auto;
+}
+
+/* Smooth fade animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar (premium subtle styling) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c7c7c7;
+}
+
+/* Selection color (small premium touch) */
+::selection {
+  background: #ff4c24;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+  .app {
+    width: 90%;
+  }
+}
