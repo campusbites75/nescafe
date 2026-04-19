@@ -1,69 +1,75 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import './FoodItem.css';
+import { assets } from '../../assets/assets';
 import { StoreContext } from '../../Context/StoreContext';
-import { motion } from 'framer-motion';
 
-const FoodItem = ({ name, price, desc, id, image, isPremium = false }) => {
-    const { cartItems, addToCart, removeFromCart, currency, url } = useContext(StoreContext);
-    const [isHovered, setIsHovered] = useState(false);
-    const quantity = cartItems?.[id] || 0;
+const FoodItem = ({ image, name, price, desc, id }) => {
+    const { cartItems, addToCart, removeFromCart, currency } = useContext(StoreContext);
+
+    // ✅ fallback image
+    const fallbackImage = "https://dummyimage.com/300x200/cccccc/000000&text=No+Image";
+
+    // 🔥 FIX: handle both filename + full URL
+    const getImageUrl = () => {
+        if (!image) return fallbackImage;
+
+        // if already full URL
+        if (image.startsWith("http")) return image;
+
+        // if only filename
+        return `https://food-court-20n0.onrender.com/images/${image}`;
+    };
 
     return (
-        <motion.div 
-            className={`food-item ${isPremium ? 'premium' : ''}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -8 }}
-            transition={{ duration: 0.4 }}
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
-        >
-            {/* Premium Badge */}
-            {isPremium && (
-                <div className="premium-badge">⭐ Premium</div>
-            )}
+        <div className='food-item'>
+            <div className='food-item-img-container'>
+                <img
+                    className='food-item-image'
+                    src={getImageUrl()}
+                    alt={name}
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = fallbackImage;
+                    }}
+                />
 
-            {/* Image */}
-            <div className="food-image">
-                <img src={`${url}${image}`} alt={name} className="food-img" />
-                <div className={`image-overlay ${isHovered ? 'hovered' : ''}`} />
-            </div>
-
-            {/* Content */}
-            <div className="food-content">
-                <h3 className="food-name">{name}</h3>
-                <p className="food-desc">{desc}</p>
-
-                <div className="price-section">
-                    <span className="current-price">
-                        {currency}{price}
-                    </span>
-                </div>
-            </div>
-
-            {/* Actions */}
-            <div className="food-actions">
-                {quantity === 0 ? (
-                    <motion.button
-                        className="add-btn"
+                {!cartItems?.[id] ? (
+                    <img
+                        className='add'
                         onClick={() => addToCart(id)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        + Add
-                    </motion.button>
+                        src={assets.add_icon_white}
+                        alt="Add"
+                    />
                 ) : (
-                    <div className="quantity-counter">
-                        <button onClick={() => removeFromCart(id)}>−</button>
-                        <span>{quantity}</span>
-                        <button onClick={() => addToCart(id)}>+</button>
+                    <div className="food-item-counter">
+                        <img
+                            src={assets.remove_icon_red}
+                            onClick={() => removeFromCart(id)}
+                            alt="Remove"
+                        />
+                        <p>{cartItems?.[id]}</p>
+                        <img
+                            src={assets.add_icon_green}
+                            onClick={() => addToCart(id)}
+                            alt="Add"
+                        />
                     </div>
                 )}
             </div>
 
-            {/* Glow */}
-            <div className={`hover-glow ${isHovered ? 'active' : ''}`} />
-        </motion.div>
+            <div className="food-item-info">
+                <div className="food-item-name-rating">
+                    <p>{name}</p>
+                    <img src={assets.rating_starts} alt="Rating" />
+                </div>
+
+                <p className="food-item-desc">{desc}</p>
+
+                <p className="food-item-price">
+                    {currency}{price}
+                </p>
+            </div>
+        </div>
     );
 };
 
