@@ -10,7 +10,7 @@ const Header = () => {
     }
   };
 
-  const heroImg = "/singh.jpg"; // ✅ from public folder
+  const heroImg = "/aa.jpg"; // ✅ from public folder
 
   return (
     <div
