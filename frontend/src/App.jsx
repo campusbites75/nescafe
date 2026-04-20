@@ -22,6 +22,9 @@ const App = () => {
   // 🔐 Auth state using token
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // 🔒 Toggle Google Login visibility (JUST CHANGE THIS)
+  const showGoogleLogin = false;
+
   // 🔁 Check login on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -40,7 +43,11 @@ const App = () => {
 
       {/* 🔴 FORCE LOGIN */}
       {!isAuthenticated && (
-        <LoginPopup showLogin={true} setShowLogin={setShowLogin} />
+        <LoginPopup 
+          showLogin={true} 
+          setShowLogin={setShowLogin}
+          showGoogleLogin={showGoogleLogin} // 👈 PASS THIS
+        />
       )}
 
       {/* 🟢 MAIN APP ONLY IF LOGGED IN */}
