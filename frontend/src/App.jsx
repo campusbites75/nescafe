@@ -19,10 +19,10 @@ const App = () => {
 
   const [showLogin, setShowLogin] = useState(false);
 
-  // 🔐 Auth state using token
+  // 🔐 Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // 🔒 Toggle Google Login visibility (JUST CHANGE THIS)
+  // 🔒 Toggle Google login (still hidden)
   const showGoogleLogin = false;
 
   // 🔁 Check login on app load
@@ -32,8 +32,8 @@ const App = () => {
     if (token) {
       setIsAuthenticated(true);
     } else {
-      setIsAuthenticated(false);
-      setShowLogin(true); // 🔥 FORCE LOGIN POPUP
+      // ✅ Allow app without login (IMPORTANT FIX)
+      setIsAuthenticated(true);
     }
   }, []);
 
@@ -41,45 +41,41 @@ const App = () => {
     <>
       <ToastContainer />
 
-      {/* 🔴 FORCE LOGIN */}
-      {!isAuthenticated && (
+      {/* 🔐 OPTIONAL LOGIN POPUP (not forced anymore) */}
+      {showLogin && (
         <LoginPopup 
-          showLogin={true} 
+          showLogin={showLogin} 
           setShowLogin={setShowLogin}
-          showGoogleLogin={showGoogleLogin} // 👈 PASS THIS
+          showGoogleLogin={showGoogleLogin}
         />
       )}
 
-      {/* 🟢 MAIN APP ONLY IF LOGGED IN */}
-      {isAuthenticated && (
-        <>
-          <div className="app">
-            <Navbar setShowLogin={setShowLogin} />
+      {/* 🟢 MAIN APP ALWAYS LOADS */}
+      <div className="app">
+        <Navbar setShowLogin={setShowLogin} />
 
-            <Routes>
+        <Routes>
 
-              {/* Admin Dashboard */}
-              <Route path="/dashboard" element={<AdminDashboard />} />
+          {/* Admin Dashboard */}
+          <Route path="/dashboard" element={<AdminDashboard />} />
 
-              {/* Main Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/order" element={<PlaceOrder />} />
-              <Route path="/myorders" element={<MyOrders />} />
-              <Route path="/verify" element={<Verify />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/delivery" element={<Delivery />} />
-              <Route path="/privacy" element={<Privacy />} />
+          {/* Main Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/order" element={<PlaceOrder />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/delivery" element={<Delivery />} />
+          <Route path="/privacy" element={<Privacy />} />
 
-              {/* 🔒 Block unknown routes */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 🔒 Block unknown routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
 
-            </Routes>
-          </div>
+        </Routes>
+      </div>
 
-          <Footer />
-        </>
-      )}
+      <Footer />
     </>
   );
 };
