@@ -19,67 +19,44 @@ const App = () => {
 
   const [showLogin, setShowLogin] = useState(false);
 
-  // 🔐 Auth state using token
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // 🔒 Toggle Google Login visibility (JUST CHANGE THIS)
+  // 🔒 Google hidden
   const showGoogleLogin = false;
-
-  // 🔁 Check login on app load
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-      setShowLogin(true); // 🔥 FORCE LOGIN POPUP
-    }
-  }, []);
 
   return (
     <>
       <ToastContainer />
 
-      {/* 🔴 FORCE LOGIN */}
-      {!isAuthenticated && (
+      {/* ✅ ONLY SHOW WHEN USER CLICKS BUTTON */}
+      {showLogin && (
         <LoginPopup 
-          showLogin={true} 
+          showLogin={showLogin} 
           setShowLogin={setShowLogin}
-          showGoogleLogin={showGoogleLogin} // 👈 PASS THIS
+          showGoogleLogin={showGoogleLogin}
         />
       )}
 
-      {/* 🟢 MAIN APP ONLY IF LOGGED IN */}
-      {isAuthenticated && (
-        <>
-          <div className="app">
-            <Navbar setShowLogin={setShowLogin} />
+      <div className="app">
+        <Navbar setShowLogin={setShowLogin} />
 
-            <Routes>
+        <Routes>
 
-              {/* Admin Dashboard */}
-              <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
 
-              {/* Main Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/order" element={<PlaceOrder />} />
-              <Route path="/myorders" element={<MyOrders />} />
-              <Route path="/verify" element={<Verify />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/delivery" element={<Delivery />} />
-              <Route path="/privacy" element={<Privacy />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/order" element={<PlaceOrder />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/delivery" element={<Delivery />} />
+          <Route path="/privacy" element={<Privacy />} />
 
-              {/* 🔒 Block unknown routes */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
 
-            </Routes>
-          </div>
+        </Routes>
+      </div>
 
-          <Footer />
-        </>
-      )}
+      <Footer />
     </>
   );
 };
