@@ -19,44 +19,60 @@ const App = () => {
 
   const [showLogin, setShowLogin] = useState(false);
 
-  // 🔒 Google hidden
-  const showGoogleLogin = false;
+  // 🔐 Auth state using token
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // 🔁 Check login on app load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      setShowLogin(true); // 🔥 FORCE LOGIN POPUP
+    }
+  }, []);
 
   return (
     <>
       <ToastContainer />
 
-      {/* ✅ ONLY SHOW WHEN USER CLICKS BUTTON */}
-      {showLogin && (
-        <LoginPopup 
-          showLogin={showLogin} 
-          setShowLogin={setShowLogin}
-          showGoogleLogin={showGoogleLogin}
-        />
+      {/* 🔴 FORCE LOGIN */}
+      {!isAuthenticated && (
+        <LoginPopup showLogin={true} setShowLogin={setShowLogin} />
       )}
 
-      <div className="app">
-        <Navbar setShowLogin={setShowLogin} />
+      {/* 🟢 MAIN APP ONLY IF LOGGED IN */}
+      {isAuthenticated && (
+        <>
+          <div className="app">
+            <Navbar setShowLogin={setShowLogin} />
 
-        <Routes>
+            <Routes>
 
-          <Route path="/dashboard" element={<AdminDashboard />} />
+              {/* Admin Dashboard */}
+              <Route path="/dashboard" element={<AdminDashboard />} />
 
-          <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/order" element={<PlaceOrder />} />
-          <Route path="/myorders" element={<MyOrders />} />
-          <Route path="/verify" element={<Verify />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/delivery" element={<Delivery />} />
-          <Route path="/privacy" element={<Privacy />} />
+              {/* Main Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/order" element={<PlaceOrder />} />
+              <Route path="/myorders" element={<MyOrders />} />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/delivery" element={<Delivery />} />
+              <Route path="/privacy" element={<Privacy />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+              {/* 🔒 Block unknown routes */}
+              <Route path="*" element={<Navigate to="/" replace />} />
 
-        </Routes>
-      </div>
+            </Routes>
+          </div>
 
-      <Footer />
+          <Footer />
+        </>
+      )}
     </>
   );
 };
