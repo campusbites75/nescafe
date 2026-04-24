@@ -24,7 +24,7 @@ const StoreContextProvider = (props) => {
   const [kitchenOpen, setKitchenOpen] = useState(null);
 
   // ============================
-  // AXIOS CONFIG
+  // AXIOS CONFIG (GLOBAL TOKEN)
   // ============================
   useEffect(() => {
     axios.defaults.baseURL = url;
@@ -90,7 +90,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // ✅ ADD TO CART WITH STOCK CHECK
+  // ADD TO CART
   // ===============================
   const addToCart = async (itemId) => {
     const item = food_list.find((p) => p._id === itemId);
@@ -99,7 +99,6 @@ const StoreContextProvider = (props) => {
     const currentQty = cartItems[itemId] || 0;
     const stock = item.quantity || 0;
 
-    // 🚫 Prevent exceeding stock
     if (currentQty >= stock) {
       alert(`Only ${stock} items available in stock`);
       return;
@@ -157,7 +156,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // PLACE ORDER
+  // PLACE ORDER (FIXED ✅)
   // ===============================
   const placeOrder = async ({
     address,
@@ -170,8 +169,6 @@ const StoreContextProvider = (props) => {
         return { success: false, message: "Cart is empty" };
       }
 
-      const subtotal = getTotalCartAmount();
-
       const endpoint =
         paymentMethod === "COD"
           ? "/api/order/placecod"
@@ -179,17 +176,15 @@ const StoreContextProvider = (props) => {
 
       const response = await axios.post(endpoint, {
         items,
-        amount: subtotal - discount,
-        discount,
-        couponCode,
-        deliveryFee,
-        totalAmount: subtotal + deliveryFee - discount,
         address,
         paymentMethod,
+        couponCode: couponCode || "",
       });
 
       if (response.data.success && paymentMethod === "COD") {
         setCartItems({});
+        setDiscount(0);
+        setCouponCode("");
         localStorage.removeItem("guestCart");
       }
 
@@ -226,7 +221,7 @@ const StoreContextProvider = (props) => {
 
     const interval = setInterval(() => {
       fetchFoodList();
-    }, 3000);
+    }, 10000); // ✅ reduced load
 
     return () => clearInterval(interval);
   }, []);
