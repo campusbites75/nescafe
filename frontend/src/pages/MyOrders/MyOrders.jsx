@@ -10,19 +10,27 @@ const MyOrders = () => {
   const [bill, setBill] = useState(null);
   const { url, token, currency } = useContext(StoreContext);
 
-  // ✅ Fetch user orders (FIXED)
+  // ✅ Format status nicely
+  const formatStatus = (order) => {
+    if (order.paymentMethod === "ONLINE" && order.paymentStatus !== "PAID") {
+      return "Payment Pending";
+    }
+    return order.status.charAt(0) + order.status.slice(1).toLowerCase();
+  };
+
+  // ✅ Fetch user orders
   const fetchOrders = async () => {
     try {
       const response = await axios.get(
         `${url}/api/order/userorders`,
         {
           headers: {
-            Authorization: `Bearer ${token}` // ✅ FIXED HEADER
+            Authorization: `Bearer ${token}`
           }
         }
       );
 
-      console.log("ORDERS RESPONSE:", response.data); // 🔍 DEBUG
+      console.log("ORDERS RESPONSE:", response.data);
 
       if (response.data.success && response.data.data) {
         const sorted = response.data.data.sort(
@@ -30,7 +38,6 @@ const MyOrders = () => {
         );
         setData(sorted);
       } else {
-        console.log("No orders found");
         setData([]);
       }
 
@@ -45,9 +52,9 @@ const MyOrders = () => {
     }
   }, [token]);
 
-  // ✅ Fetch bill (FIXED HEADERS)
+  // ✅ Fetch bill
   const viewBill = async (order) => {
-    if (order.status !== "delivered") {
+    if (order.status !== "DELIVERED") {
       alert("Bill is available only for delivered orders.");
       return;
     }
@@ -57,7 +64,7 @@ const MyOrders = () => {
         `${url}/api/order/bill/${order._id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}` // ✅ FIXED
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -101,16 +108,16 @@ const MyOrders = () => {
             <p>Items: {order.items.length}</p>
 
             <p>
-              <span>&#x25cf;</span> <b>{order.status}</b>
+              <span>&#x25cf;</span> <b>{formatStatus(order)}</b>
             </p>
 
             <button
               className="view-bill-btn"
-              disabled={order.status !== "delivered"}
+              disabled={order.status !== "DELIVERED"}
               onClick={() => viewBill(order)}
               style={{
-                opacity: order.status !== "delivered" ? 0.5 : 1,
-                cursor: order.status !== "delivered" ? "not-allowed" : "pointer"
+                opacity: order.status !== "DELIVERED" ? 0.5 : 1,
+                cursor: order.status !== "DELIVERED" ? "not-allowed" : "pointer"
               }}
             >
               View Bill
@@ -120,14 +127,14 @@ const MyOrders = () => {
         ))}
       </div>
 
-      {/* ✅ EMPTY STATE FIX */}
+      {/* ✅ Empty state */}
       {data.length === 0 && (
         <p style={{ textAlign: "center", marginTop: "20px" }}>
           No orders found 😕
         </p>
       )}
 
-      {/* ✅ BILL MODAL */}
+      {/* ✅ Bill modal */}
       {bill && (
         <div className="bill-modal">
           <div className="bill-box">
