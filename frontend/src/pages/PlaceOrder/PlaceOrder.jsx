@@ -12,56 +12,49 @@ const handlePayment = async (
   items,
   token,
   setPaymentStatus,
-  onSuccess
+  onSuccess  // ✅ callback for orderId
 ) => {
   try {
     const { data } = await axios.post(
-      "https://nescafe-ovhf.onrender.com/api/payment/create-order",
-      {
-        amount,
-        items,        // ✅ FIXED
-        address       // ✅ FIXED
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
+      "https://food-court-20n0.onrender.com/api/payment/create-order",
+      { amount },
+      { headers: token ? { token } : {} }
     );
 
+    // ✅ Razorpay script check
     if (!window.Razorpay) {
       setPaymentStatus('error');
-      alert('Payment gateway not loaded.');
+      alert('Payment gateway not loaded. Please refresh and try again.');
       return;
     }
-
+const isMobile = () => {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY,
-      amount: data.razorpayOrder.amount,   // ✅ FIXED
-      currency: data.razorpayOrder.currency,
+      amount: data.amount,
+      currency: data.currency,
       name: "Campus Bites",
       description: "Secure Checkout",
-      order_id: data.razorpayOrder.id,     // ✅ FIXED
-
+      image: "/logo.png",
+      order_id: data.id,
+      
       handler: async function (response) {
         setPaymentStatus('verifying');
 
         try {
           const verify = await axios.post(
-            "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
+            "https://food-court-20n0.onrender.com/api/payment/verify-payment",
             {
               ...response,
-              orderId: data.orderId   // ✅ VERY IMPORTANT
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
+              items,
+              address,
+              amount
             }
           );
 
           if (verify.data.success) {
-            onSuccess(data.orderId);  // ✅ FIXED
+            onSuccess(verify.data.orderId); // ✅ Pass orderId to callback
           } else {
             setPaymentStatus('failed');
           }
@@ -77,9 +70,13 @@ const handlePayment = async (
         }
       },
 
-      prefill: {
-        contact: address.phone || ""
-      },
+prefill: {
+  contact: address.phone || ""
+},
+
+upi: {
+  flow: isMobile() ? "intent" : "collect"
+},
 
       theme: { color: "#ff4d4f" }
     };
@@ -92,6 +89,7 @@ const handlePayment = async (
     setPaymentStatus('error');
   }
 };
+
 /* ================= BREAK WINDOW FORMAT ================= */
 const formatBreakWindow = (timeStr) => {
   if (!timeStr) return "";
@@ -246,12 +244,8 @@ const PlaceOrder = () => {
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `https://nescafe-ovhf.onrender.com/api/order/status/${orderId}`,
-          {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+          `https://food-court-20n0.onrender.com/api/order/status/${orderId}`,
+          { headers: token ? { token } : {} }
         );
 
         const status = data.order?.status || data.status;
