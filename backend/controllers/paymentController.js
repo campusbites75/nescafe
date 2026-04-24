@@ -8,22 +8,42 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-/* ================= CREATE RAZORPAY ORDER ================= */
+/* ================= CREATE ORDER + RAZORPAY ORDER ================= */
 const createRazorpayOrder = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const userId = req.user?.id; // 🔥 IMPORTANT
 
-    const options = {
+    const { amount, items, address } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated"
+      });
+    }
+
+    // ✅ Create DB order FIRST
+    const newOrder = await orderModel.create({
+      userId,
+      items,
+      amount,
+      address,
+      paymentMethod: "ONLINE",
+      paymentStatus: "PENDING",
+      status: "PENDING"
+    });
+
+    // ✅ Create Razorpay order
+    const razorpayOrder = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
-      receipt: "order_rcptid_" + Date.now()
-    };
-
-    const order = await razorpay.orders.create(options);
+      receipt: newOrder._id.toString()
+    });
 
     res.json({
       success: true,
-      order
+      razorpayOrder,
+      orderId: newOrder._id // 🔥 send to frontend
     });
 
   } catch (error) {
@@ -32,7 +52,7 @@ const createRazorpayOrder = async (req, res) => {
   }
 };
 
-/* ================= 🔥 VERIFY PAYMENT & UPDATE STOCK ================= */
+/* ================= VERIFY PAYMENT ================= */
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -42,7 +62,6 @@ const verifyPayment = async (req, res) => {
       orderId
     } = req.body;
 
-    // ✅ Verify signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
@@ -57,7 +76,6 @@ const verifyPayment = async (req, res) => {
       });
     }
 
-    // ✅ Get order from DB
     const order = await orderModel.findById(orderId);
 
     if (!order) {
@@ -67,7 +85,7 @@ const verifyPayment = async (req, res) => {
       });
     }
 
-    // 🔥 UPDATE STOCK HERE (IMPORTANT)
+    // ✅ UPDATE STOCK
     for (const item of order.items) {
       const food = await foodModel.findById(item._id);
 
@@ -76,7 +94,7 @@ const verifyPayment = async (req, res) => {
       if (food.quantity < item.quantity) {
         return res.json({
           success: false,
-          message: `${food.name} is out of stock`
+          message: `${food.name} out of stock`
         });
       }
 
@@ -84,7 +102,7 @@ const verifyPayment = async (req, res) => {
       await food.save();
     }
 
-    // ✅ Mark order as PAID
+    // ✅ UPDATE ORDER STATUS
     order.paymentStatus = "PAID";
     order.status = "CONFIRMED";
     order.payment = true;
@@ -93,7 +111,7 @@ const verifyPayment = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Payment verified & stock updated"
+      orderId: order._id
     });
 
   } catch (error) {
