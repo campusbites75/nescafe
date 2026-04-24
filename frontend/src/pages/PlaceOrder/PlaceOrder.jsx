@@ -18,7 +18,11 @@ const handlePayment = async (
     const { data } = await axios.post(
       "https://nescafe-ovhf.onrender.com/api/payment/create-order",
       { amount },
-      { headers: token ? { token } : {} }
+      {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
     );
 
     // ✅ Razorpay script check
@@ -44,14 +48,19 @@ const isMobile = () => {
 
         try {
           const verify = await axios.post(
-            "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
-            {
-              ...response,
-              items,
-              address,
-              amount
-            }
-          );
+  "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
+  {
+    ...response,
+    items,
+    address,
+    amount
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
           if (verify.data.success) {
             onSuccess(verify.data.orderId); // ✅ Pass orderId to callback
@@ -245,7 +254,11 @@ const PlaceOrder = () => {
       try {
         const { data } = await axios.get(
           `https://nescafe-ovhf.onrender.com/api/order/status/${orderId}`,
-          { headers: token ? { token } : {} }
+          {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
         );
 
         const status = data.order?.status || data.status;
