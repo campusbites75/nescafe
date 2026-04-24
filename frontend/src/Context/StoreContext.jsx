@@ -5,7 +5,7 @@ import axios from "axios";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
-  const url = "https://nescafe-ovhf.onrender.com";
+  const url = "https://food-court-20n0.onrender.com";
 
   const [food_list, setFoodList] = useState([]);
   const [cartItems, setCartItems] = useState({});
@@ -24,7 +24,7 @@ const StoreContextProvider = (props) => {
   const [kitchenOpen, setKitchenOpen] = useState(null);
 
   // ============================
-  // AXIOS CONFIG (GLOBAL TOKEN)
+  // AXIOS CONFIG
   // ============================
   useEffect(() => {
     axios.defaults.baseURL = url;
@@ -90,7 +90,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // ADD TO CART
+  // ✅ ADD TO CART WITH STOCK CHECK
   // ===============================
   const addToCart = async (itemId) => {
     const item = food_list.find((p) => p._id === itemId);
@@ -99,6 +99,7 @@ const StoreContextProvider = (props) => {
     const currentQty = cartItems[itemId] || 0;
     const stock = item.quantity || 0;
 
+    // 🚫 Prevent exceeding stock
     if (currentQty >= stock) {
       alert(`Only ${stock} items available in stock`);
       return;
@@ -156,7 +157,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // PLACE ORDER (SAFE + CLEAN)
+  // PLACE ORDER
   // ===============================
   const placeOrder = async ({
     address,
@@ -169,6 +170,8 @@ const StoreContextProvider = (props) => {
         return { success: false, message: "Cart is empty" };
       }
 
+      const subtotal = getTotalCartAmount();
+
       const endpoint =
         paymentMethod === "COD"
           ? "/api/order/placecod"
@@ -176,15 +179,17 @@ const StoreContextProvider = (props) => {
 
       const response = await axios.post(endpoint, {
         items,
+        amount: subtotal - discount,
+        discount,
+        couponCode,
+        deliveryFee,
+        totalAmount: subtotal + deliveryFee - discount,
         address,
         paymentMethod,
-        couponCode: couponCode || "",
       });
 
       if (response.data.success && paymentMethod === "COD") {
         setCartItems({});
-        setDiscount(0);
-        setCouponCode("");
         localStorage.removeItem("guestCart");
       }
 
@@ -199,7 +204,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // INITIAL LOAD
+  // INITIAL LOAD + AUTO REFRESH
   // ===============================
   useEffect(() => {
     async function loadData() {
@@ -221,7 +226,7 @@ const StoreContextProvider = (props) => {
 
     const interval = setInterval(() => {
       fetchFoodList();
-    }, 10000); // reduced load
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
