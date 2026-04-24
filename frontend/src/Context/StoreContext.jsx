@@ -156,7 +156,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // PLACE ORDER (FIXED ✅)
+  // PLACE ORDER (SAFE + CLEAN)
   // ===============================
   const placeOrder = async ({
     address,
@@ -199,7 +199,7 @@ const StoreContextProvider = (props) => {
   };
 
   // ===============================
-  // INITIAL LOAD + AUTO REFRESH
+  // INITIAL LOAD
   // ===============================
   useEffect(() => {
     async function loadData() {
@@ -221,7 +221,7 @@ const StoreContextProvider = (props) => {
 
     const interval = setInterval(() => {
       fetchFoodList();
-    }, 10000); // ✅ reduced load
+    }, 10000); // reduced load
 
     return () => clearInterval(interval);
   }, []);
