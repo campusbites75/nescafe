@@ -12,58 +12,56 @@ const handlePayment = async (
   items,
   token,
   setPaymentStatus,
-  onSuccess  // ✅ callback for orderId
+  onSuccess
 ) => {
   try {
     const { data } = await axios.post(
       "https://nescafe-ovhf.onrender.com/api/payment/create-order",
-      { amount },
       {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+        amount,
+        items,        // ✅ FIXED
+        address       // ✅ FIXED
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
 
-    // ✅ Razorpay script check
     if (!window.Razorpay) {
       setPaymentStatus('error');
-      alert('Payment gateway not loaded. Please refresh and try again.');
+      alert('Payment gateway not loaded.');
       return;
     }
-const isMobile = () => {
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-};
+
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY,
-      amount: data.amount,
-      currency: data.currency,
+      amount: data.razorpayOrder.amount,   // ✅ FIXED
+      currency: data.razorpayOrder.currency,
       name: "Campus Bites",
       description: "Secure Checkout",
-      image: "/logo.png",
-      order_id: data.id,
-      
+      order_id: data.razorpayOrder.id,     // ✅ FIXED
+
       handler: async function (response) {
         setPaymentStatus('verifying');
 
         try {
           const verify = await axios.post(
-  "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
-  {
-    ...response,
-    items,
-    address,
-    amount
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }
-);
+            "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
+            {
+              ...response,
+              orderId: data.orderId   // ✅ VERY IMPORTANT
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          );
 
           if (verify.data.success) {
-            onSuccess(verify.data.orderId); // ✅ Pass orderId to callback
+            onSuccess(data.orderId);  // ✅ FIXED
           } else {
             setPaymentStatus('failed');
           }
@@ -79,13 +77,9 @@ const isMobile = () => {
         }
       },
 
-prefill: {
-  contact: address.phone || ""
-},
-
-upi: {
-  flow: isMobile() ? "intent" : "collect"
-},
+      prefill: {
+        contact: address.phone || ""
+      },
 
       theme: { color: "#ff4d4f" }
     };
@@ -98,7 +92,6 @@ upi: {
     setPaymentStatus('error');
   }
 };
-
 /* ================= BREAK WINDOW FORMAT ================= */
 const formatBreakWindow = (timeStr) => {
   if (!timeStr) return "";
