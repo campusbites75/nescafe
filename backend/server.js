@@ -68,6 +68,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+app.options("*", cors());
 
 // 🔥 Make io accessible in routes/controllers
 app.set("io", io);
