@@ -99,9 +99,9 @@ const createOrderObject = async ({ userId, items, amount, discount, couponCode, 
     couponCode: couponCode || null,
     address,
     specialInstructions: address?.specialInstructions || "",
-    paymentStatus: paymentMethod === "PENDING" ? "PENDING" : "PAID", // 🔥 NEW
-    status: paymentMethod === "PENDING" ? "PENDING" : "PAID",        // 🔥 NEW
-    payment: paymentMethod === "PAID",
+paymentStatus: paymentMethod === "ONLINE" ? "PENDING" : "PAID",
+status: paymentMethod === "ONLINE" ? "PENDING" : "CONFIRMED",
+payment: paymentMethod !== "ONLINE",
     paymentMethod,
     deliveryFee: deliveryFee || 0
   });
@@ -145,7 +145,7 @@ export const placeOrder = async (req, res) => {
       couponCode,
       address: updatedAddress,
       deliveryFee,
-      paymentMethod: "PENDING"
+      paymentMethod: "ONLINE"
     });
 console.log("STOCK ITEMS:", order.items);
     // ✅ ONLY ONE CALL
