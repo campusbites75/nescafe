@@ -16,7 +16,7 @@ const handlePayment = async (
 ) => {
   try {
     const { data } = await axios.post(
-      "https://food-court-20n0.onrender.com/api/payment/create-order",
+      "https://nescafe-ovhf.onrender.com/api/payment/create-order",
       { amount },
       { headers: token ? { token } : {} }
     );
@@ -44,7 +44,7 @@ const isMobile = () => {
 
         try {
           const verify = await axios.post(
-            "https://food-court-20n0.onrender.com/api/payment/verify-payment",
+            "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
             {
               ...response,
               items,
@@ -244,7 +244,7 @@ const PlaceOrder = () => {
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `https://food-court-20n0.onrender.com/api/order/status/${orderId}`,
+          `https://nescafe-ovhf.onrender.com/api/order/status/${orderId}`,
           { headers: token ? { token } : {} }
         );
 
