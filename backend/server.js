@@ -68,7 +68,20 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-app.options("*", cors());
+// ✅ CORS FIRST — ALWAYS
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5500",
+    "https://campusbitesnescafeadmin-beta.vercel.app",
+    "https://campusbitesnescafe-ochre.vercel.app"
+  ],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // 🔥 Make io accessible in routes/controllers
 app.set("io", io);
