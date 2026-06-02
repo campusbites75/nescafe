@@ -2,6 +2,7 @@ import express from "express";
 import { razorpayInstance } from "../config/razorpay.js";
 import crypto from "crypto";
 import Order from "../models/orderModel.js";
+import authMiddleware from "../middleware/auth.js";
 import foodModel from "../models/foodModel.js"; // ⭐ ADD THIS
 
 const router = express.Router();
@@ -43,7 +44,10 @@ router.post("/create-order", async (req, res) => {
 });
 
 /* ================= VERIFY PAYMENT ================= */
-router.post("/verify-payment", async (req, res) => {
+router.post(
+  "/verify-payment",
+  authMiddleware,
+  async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -92,28 +96,34 @@ router.post("/verify-payment", async (req, res) => {
     }
 
     // 🔥 STEP 2: CREATE ORDER
-    const newOrder = await Order.create({
-      orderNumber: "CB-" + Math.floor(100000 + Math.random() * 900000),
+    const userId = req.user.id;
 
-      items,
-      address,
-      amount,
+const newOrder = await Order.create({
+  userId,
 
-      paymentMethod: "ONLINE",
-      paymentStatus: "PAID",
-      status: "CONFIRMED",
-      payment: true,
+  orderNumber: "CB-" + Math.floor(100000 + Math.random() * 900000),
 
-      razorpayPaymentId: razorpay_payment_id,
-      razorpayOrderId: razorpay_order_id
-    });
+  items,
+  address,
+  amount,
+
+  paymentMethod: "ONLINE",
+  paymentStatus: "PAID",
+  status: "CONFIRMED",
+  payment: true,
+
+  razorpayPaymentId: razorpay_payment_id,
+  razorpayOrderId: razorpay_order_id
+});
 
     console.log("✅ ORDER CREATED:", newOrder._id);
 
     res.json({
-      success: true,
-      orderId: newOrder._id
-    });
+  success: true,
+  orderId: newOrder._id,
+  orderNumber: newOrder.orderNumber,
+  message: "Order placed successfully"
+});
 
   } catch (error) {
     console.error("VERIFY ERROR:", error);
