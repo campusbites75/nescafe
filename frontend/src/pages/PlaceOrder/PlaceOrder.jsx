@@ -16,7 +16,7 @@ const handlePayment = async (
 ) => {
   try {
     const { data } = await axios.post(
-      "https://singhcafe.onrender.com/api/payment/create-order",
+      "https://campusbitesnescafe.vercel.app/api/payment/create-order",
       { amount },
       { headers: token ? { token } : {} }
     );
@@ -251,7 +251,7 @@ const PlaceOrder = () => {
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `https://singhcafe.onrender.com/api/order/status/${orderId}`,
+          `https://campusbitesnescafe.vercel.app/api/order/status/${orderId}`,
           { headers: token ? { token } : {} }
         );
 
