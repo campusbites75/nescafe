@@ -16,7 +16,7 @@ const handlePayment = async (
 ) => {
   try {
     const { data } = await axios.post(
-      "https://nescafe-ovhf.onrender.com/api/payment/create-order",
+      "https://singhcafe.onrender.com/api/payment/create-order",
       { amount },
       { headers: token ? { token } : {} }
     );
@@ -44,20 +44,27 @@ const isMobile = () => {
 
         try {
           const verify = await axios.post(
-            "https://nescafe-ovhf.onrender.com/api/payment/verify-payment",
-            {
-              ...response,
-              items,
-              address,
-              amount
-            }
-          );
+  "/api/payment/verify-payment",
+  {
+    ...response,
+    items,
+    address,
+    amount
+  },
+  {
+    headers: { token }
+  }
+);
 
           if (verify.data.success) {
-            onSuccess(verify.data.orderId); // ✅ Pass orderId to callback
-          } else {
-            setPaymentStatus('failed');
-          }
+  onSuccess({
+    orderId: verify.data.orderId,
+    orderNumber: verify.data.orderNumber,
+    message: verify.data.message
+  });
+} else {
+  setPaymentStatus('failed');
+}
         } catch (err) {
           console.error(err);
           setPaymentStatus('error');
@@ -244,7 +251,7 @@ const PlaceOrder = () => {
     pollingRef.current = setInterval(async () => {
       try {
         const { data } = await axios.get(
-          `https://nescafe-ovhf.onrender.com/api/order/status/${orderId}`,
+          `https://singhcafe.onrender.com/api/order/status/${orderId}`,
           { headers: token ? { token } : {} }
         );
 
@@ -340,11 +347,15 @@ const PlaceOrder = () => {
         buildOrderItems(),
         token,
         setPaymentStatus,
-        (realOrderId) => {
-          setCurrentOrderId(realOrderId);
-          localStorage.setItem("activeOrderId", realOrderId);
-          setPaymentStatus('processing');
-        }
+        (orderData) => {
+  setCurrentOrderId(orderData.orderId);
+  localStorage.setItem("activeOrderId", orderData.orderId);
+
+  // 🔥 SHOW INSTANT NOTIFICATION
+  alert(`🎉 ${orderData.message}\nOrder No: ${orderData.orderNumber}`);
+
+  setPaymentStatus('processing');
+}
       );
     } catch (error) {
       console.error("Payment error:", error);
